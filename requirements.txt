@@ -1,0 +1,10 @@
+datasets
+pandas
+groq
+streamlit
+pydantic
+pydantic-settings
+python-dotenv
+pytest
+fastapi
+uvicorn[standard]
