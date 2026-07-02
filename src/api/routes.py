@@ -8,6 +8,7 @@ filter-option metadata for the frontend dropdowns.
 from __future__ import annotations
 
 import logging
+import os
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,9 +30,29 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# ---------------------------------------------------------------------------
+# CORS origins — locked to known frontends for security.
+# ALLOWED_ORIGINS env var accepts a comma-separated list and overrides this.
+# ---------------------------------------------------------------------------
+
+_default_origins = [
+    "http://localhost:3000",       # local Next.js dev server
+    "http://localhost:3001",
+    # Vercel preview & production URLs — set ALLOWED_ORIGINS in Railway env
+    # to your exact Vercel URL once deployed, e.g.:
+    # https://ai-restaurant-recommender.vercel.app
+]
+
+_env_origins = os.getenv("ALLOWED_ORIGINS", "")
+_allowed_origins: list[str] = (
+    [o.strip() for o in _env_origins.split(",") if o.strip()]
+    if _env_origins
+    else ["*"]   # open during initial deploy; tighten after Vercel URL is known
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
