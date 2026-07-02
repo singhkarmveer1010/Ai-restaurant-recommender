@@ -38,9 +38,8 @@ app = FastAPI(
 _default_origins = [
     "http://localhost:3000",       # local Next.js dev server
     "http://localhost:3001",
-    # Vercel preview & production URLs — set ALLOWED_ORIGINS in Railway env
-    # to your exact Vercel URL once deployed, e.g.:
-    # https://ai-restaurant-recommender.vercel.app
+    "https://ai-restaurant-recommender-gamma.vercel.app",
+    "https://ai-restaurant-recommender.vercel.app",
 ]
 
 _env_origins = os.getenv("ALLOWED_ORIGINS", "")

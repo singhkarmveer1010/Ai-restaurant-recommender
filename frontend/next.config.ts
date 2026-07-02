@@ -1,9 +1,20 @@
 import type { NextConfig } from "next";
 
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 const nextConfig: NextConfig = {
-  // Allow the production Railway backend URL to be called from the browser.
-  // Set NEXT_PUBLIC_API_URL in Vercel env vars to your Railway service URL.
-  // e.g. https://ai-restaurant-recommender-production.up.railway.app
+  // Proxy /api/* requests through Vercel's serverless edge to the Railway
+  // backend.  This avoids DNS / ISP blocks that prevent the browser from
+  // reaching the .up.railway.app domain directly.
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${BACKEND_URL}/api/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

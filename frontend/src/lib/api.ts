@@ -1,8 +1,9 @@
 /**
  * API client for the restaurant recommendation backend.
  *
- * Wraps fetch calls to the FastAPI endpoints with proper typing
- * and error handling.
+ * All requests use relative URLs (/api/...) so that Next.js rewrites
+ * proxy them server-side to the Railway backend.  This avoids browser-level
+ * DNS / ISP blocks on the .up.railway.app domain.
  */
 
 import type {
@@ -11,13 +12,11 @@ import type {
   FilterOptions,
 } from "@/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 /**
  * Fetch available filter options (locations + cuisines) for the preference form.
  */
 export async function fetchFilterOptions(): Promise<FilterOptions> {
-  const res = await fetch(`${API_BASE}/api/options`);
+  const res = await fetch("/api/options");
 
   if (!res.ok) {
     throw new Error(`Failed to fetch filter options: ${res.status}`);
@@ -32,7 +31,7 @@ export async function fetchFilterOptions(): Promise<FilterOptions> {
 export async function fetchRecommendations(
   preferences: UserPreferences
 ): Promise<RecommendationResponse> {
-  const res = await fetch(`${API_BASE}/api/recommend`, {
+  const res = await fetch("/api/recommend", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(preferences),
