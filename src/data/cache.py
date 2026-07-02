@@ -68,13 +68,22 @@ def get_all_restaurants() -> list[Restaurant]:
     if _cache is not None:
         return _cache
 
+    # 1. Try bundled preprocessed repo dataset (data/restaurants.json)
+    repo_cache_path = Path(__file__).resolve().parents[2] / "data" / "restaurants.json"
+    if repo_cache_path.exists():
+        cached = _load_from_disk(repo_cache_path)
+        if cached is not None:
+            _cache = cached
+            logger.info("Loaded %d restaurants from bundled repo cache", len(_cache))
+            return _cache
+
+    # 2. Try disk cache path from settings
     cache_path = (
         Path(settings.dataset_cache_path)
         if settings.dataset_cache_path
         else None
     )
 
-    # Try disk cache first
     if cache_path is not None:
         cached = _load_from_disk(cache_path)
         if cached is not None:
@@ -82,7 +91,7 @@ def get_all_restaurants() -> list[Restaurant]:
             logger.info("Loaded %d restaurants from disk cache", len(_cache))
             return _cache
 
-    # Fall back to full ingestion
+    # 3. Fall back to full ingestion
     _cache = load_and_preprocess()
 
     # Persist if cache path is configured

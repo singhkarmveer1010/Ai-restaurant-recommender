@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 import re
+from pathlib import Path
 from typing import Literal
 
 import pandas as pd
@@ -150,11 +151,15 @@ def load_and_preprocess(dataset_id: str = DATASET_ID) -> list[Restaurant]:
     list[Restaurant]
         Cleaned, normalised restaurant records.
     """
-    logger.info("Loading dataset from Hugging Face: %s", dataset_id)
-
-    # 1. Load raw dataset
-    ds = load_dataset(dataset_id, split="train")
-    df = ds.to_pandas()
+    # 1. Load raw dataset (check local parquet first to avoid network dependencies)
+    local_parquet = Path(__file__).resolve().parents[2] / "data" / "restaurent.parquet"
+    if local_parquet.exists():
+        logger.info("Loading raw dataset from local file: %s", local_parquet)
+        df = pd.read_parquet(local_parquet)
+    else:
+        logger.info("Loading dataset from Hugging Face: %s", dataset_id)
+        ds = load_dataset(dataset_id, split="train")
+        df = ds.to_pandas()
     logger.info("Raw dataset loaded: %d rows, columns=%s", len(df), list(df.columns))
 
     # 2. Verify expected columns exist, adapt if needed
