@@ -83,8 +83,20 @@ export default function PreferenceForm({ onSubmit, isLoading }: PreferenceFormPr
           }
         }
         if (opts.cuisines && opts.cuisines.length > 0) {
-          // Keep top 18 most popular cuisines for clean pill UI
-          setCuisines(opts.cuisines.slice(0, 18));
+          // Prioritise well-known common cuisines first, then fill remaining
+          // slots with any extra unique cuisines returned by the API.
+          const prioritised = DEFAULT_CUISINES.filter((c) =>
+            opts.cuisines.some(
+              (apiC: string) => apiC.toLowerCase() === c.toLowerCase()
+            )
+          );
+          const extras = opts.cuisines.filter(
+            (apiC: string) =>
+              !DEFAULT_CUISINES.some(
+                (c) => c.toLowerCase() === apiC.toLowerCase()
+              )
+          );
+          setCuisines([...prioritised, ...extras].slice(0, 18));
         }
       })
       .catch((err) => {
